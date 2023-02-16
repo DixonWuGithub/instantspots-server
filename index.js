@@ -39,6 +39,13 @@ socketServer.on('connection', (socket) => {
         console.log('roomname is ', data.roomName)
         sendMessage(socket, data.roomName, data.sender, broadcastMessage);
         break;
+      case 'getRooms':
+        socket.send(stringify({
+          type: 'rooms',
+          message: asks
+        }));
+
+        break;
       default:
         break;
     }
@@ -79,7 +86,7 @@ function joinRoom(socket, roomName) {
   if (!ask) {
     ask = { name: roomName, clients: [], messages: [] };
     asks.push(ask);
-    
+
   }
   console.log(asks)
   console.log(ask)
@@ -98,7 +105,7 @@ function joinRoom(socket, roomName) {
 }
 
 function sendMessage(socket, roomName, sender, message) {
-  
+
   let ask = asks.find(a => a.name === roomName);
   console.log('ask is', ask)
   if (!ask) {
