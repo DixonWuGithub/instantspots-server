@@ -2,18 +2,14 @@ const express = require("express");
 const WebSocket = require("ws");
 const http = require('http')
 const fs = require('node:fs');
-// const {parse, stringify} = require('flatted')
 const stringify = require("safe-stable-stringify")
 const app = express();
 const server = http.createServer(app);
 const socketServer = new WebSocket.Server({ server });
-// require("json-circular-stringify")
-
 const { v4: uuidv4 } = require('uuid');
-const clientsList = [];
-const commentArray = [];
-let asks = [];
 
+const clientsList = [];
+let asks = [];
 
 socketServer.on('connection', (socket) => {
   readTopics()
@@ -21,8 +17,6 @@ socketServer.on('connection', (socket) => {
   clientsList.push(socket);
 
   socket.on('message', (message) => {
-
-
     const data = JSON.parse(message);
     console.log(data)
 
@@ -34,8 +28,6 @@ socketServer.on('connection', (socket) => {
       case 'sendMessage':
         const sender = data.sender;
         const broadcastMessage = `${sender.name} said: ${data.message}`;
-        // commentArray.push(broadcastMessage)
-        // console.log(commentArray)
         console.log('roomname is ', data.roomName)
         sendMessage(socket, data.roomName, data.sender, broadcastMessage);
         break;
@@ -44,7 +36,6 @@ socketServer.on('connection', (socket) => {
           type: 'rooms',
           message: asks
         }));
-
         break;
       default:
         break;
@@ -63,7 +54,6 @@ socketServer.on('connection', (socket) => {
       const askClientIndex = ask.clients.findIndex(client => client === socket);
       ask.clients.splice(askClientIndex, 1);
     }
-
   });
 });
 
@@ -73,7 +63,6 @@ function leaveCurrentRoom(socket) {
     const clientIndex = ask.clients.findIndex(client => client === socket);
     ask.clients.splice(clientIndex, 1);
   }
-  // writeTopicsToFile(asks)
 
   socket.send(JSON.stringify({
     type: 'newMessage',
@@ -86,7 +75,6 @@ function joinRoom(socket, roomName) {
   if (!ask) {
     ask = { name: roomName, clients: [], messages: [] };
     asks.push(ask);
-
   }
   console.log(asks)
   console.log(ask)
@@ -105,17 +93,12 @@ function joinRoom(socket, roomName) {
 }
 
 function sendMessage(socket, roomName, sender, message) {
-
   let ask = asks.find(a => a.name === roomName);
   console.log('ask is', ask)
   if (!ask) {
     console.log("ask not found")
     return;
   }
-
-  // if (!ask.clients.find(client => client.id === sender.id)) {
-  //   ask.clients.push({ id: sender.id, socket });
-  // }
 
   console.log(`Received message: ${message}`);
   ask.messages.push(message);
@@ -128,9 +111,6 @@ function sendMessage(socket, roomName, sender, message) {
         message: [...ask.messages]
       }));
     }
-
-    // const id = uuidv4()
-    // const sender = socket._socket.remoteAddress + ':' + socket._socket.remotePort;
   });
 }
 
